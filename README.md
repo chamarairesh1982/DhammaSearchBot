@@ -1,5 +1,7 @@
 # 🛕 Sinhala Dhamma Search Bot
 
+A simple in-browser chat bot for searching Sinhala Buddhist texts.
+
 A fast, intelligent Sinhala-language Dhamma search engine built with HTML, JavaScript, and GitHub Pages. 
 
 Searches Buddhist teachings (ධර්ම දේශනා), Nibbana concepts (නිවන්), and more — 100% free and offline-capable.
@@ -8,14 +10,15 @@ Searches Buddhist teachings (ධර්ම දේශනා), Nibbana concepts (�
 👉 [Visit Dhamma Search Bot](https://chamarairesh1982.github.io/DhammaSearchBot/)
 
 ## 🧠 Features
+- Chat style interface for quick answers
 - Sinhala Intelligent Search (සිංහල බුද්ධිමත් සෙවුම)
 - Synonym matching for Dhamma terms
-- Fast, no server — pure HTML & JS
+- Works entirely in your browser
 - Voice search support (🎤 Speak your question in Sinhala)
 - Optimized for Buddhist teachings, Nibbana, and Dhamma.
 
 ## 📂 Project Structure
-/index.html -> Main search app
+/index.html -> Chat interface and search logic
 /textfile/ -> Sinhala text files
 
 sinhala-text1.txt

@@ -19,7 +19,7 @@
       color: #2c3e50;
       margin-bottom: 20px;
     }
-    #search-box {
+    #input-area {
       display: flex;
       width: 100%;
       max-width: 600px;
@@ -47,23 +47,6 @@
     button:hover {
       background-color: #2980b9;
     }
-    #result {
-      width: 100%;
-      max-width: 700px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-    }
     mark {
       background-color: #f1c40f;
       padding: 2px 4px;
@@ -74,19 +57,52 @@
       font-size: 14px;
       color: #7f8c8d;
     }
+
+    /* Chat styles */
+    #chat-container {
+      width: 100%;
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    #messages {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .message {
+      padding: 12px 20px;
+      border-radius: 10px;
+      max-width: 80%;
+    }
+    .message.user {
+      align-self: flex-end;
+      background-color: #d1ecf1;
+    }
+    .message.bot {
+      align-self: flex-start;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+    }
+    #input-area {
+      display: flex;
+      gap: 5px;
+    }
   </style>
 </head>
 <body>
 
-  <h1>සිංහල බුද්ධිමත් සෙවුම</h1>
+  <h1>සිංහල බුද්ධිමත් සෙවුම් Bot</h1>
 
-  <div id="search-box">
-    <input type="text" id="query" placeholder="ඔබේ ප්‍රශ්නය යොදන්න...">
-    <button onclick="search()">සෙවීම</button>
-    <button onclick="startVoice()">🎤</button>
+  <div id="chat-container">
+    <div id="messages"></div>
+    <div id="input-area">
+      <input type="text" id="query" placeholder="ඔබේ ප්‍රශ්නය යොදන්න...">
+      <button onclick="sendMessage()">Send</button>
+      <button onclick="startVoice()">🎤</button>
+    </div>
   </div>
-
-  <div id="result"></div>
 
   <script>
     let data = [];
@@ -187,42 +203,44 @@
       return score;
     }
 
-    function search() {
-      const query = document.getElementById('query').value.trim();
-      if (!query) {
-        document.getElementById('result').innerHTML = "<p>කරුණාකර ප්‍රශ්නයක් යොදන්න.</p>";
-        return;
-      }
-      if (data.length === 0) {
-        document.getElementById('result').innerHTML = "<p>දත්ත පූරණය නොවී ඇත.</p>";
-        return;
-      }
-
+    function getTopResult(query) {
+      if (!query || data.length === 0) return null;
       const queryWords = expandSynonyms(tokenize(query));
       const scoredResults = data.map(item => {
         const textWords = tokenize(item.text);
         let score = enhancedSimilarity(queryWords, textWords);
         if (item.text.includes(query)) {
-          score += 5; // Boost for exact match
+          score += 5;
         }
         return { ...item, score };
       });
-
       scoredResults.sort((a, b) => b.score - a.score);
+      const top = scoredResults.find(r => r.score > 0);
+      if (!top) return null;
+      return highlight(top.text, queryWords) +
+        `<div class="source">මූලාශ්‍රය: ${top.source}</div>`;
+    }
 
-      const topResults = scoredResults.slice(0, 5).filter(r => r.score > 0);
+    function addMessage(role, html) {
+      const div = document.createElement('div');
+      div.className = `message ${role}`;
+      div.innerHTML = html;
+      document.getElementById('messages').appendChild(div);
+      div.scrollIntoView();
+    }
 
-      if (topResults.length === 0) {
-        document.getElementById('result').innerHTML = "<p>කිසිදු ප්‍රතිඵලයක් නැත.</p>";
-        return;
+    function sendMessage() {
+      const input = document.getElementById('query');
+      const query = input.value.trim();
+      if (!query) return;
+      addMessage('user', query);
+      const answer = getTopResult(query);
+      if (answer) {
+        addMessage('bot', answer);
+      } else {
+        addMessage('bot', 'කිසිදු ප්‍රතිඵලයක් නැත.');
       }
-
-      document.getElementById('result').innerHTML = topResults.map(r => `
-        <div class="card">
-          ${highlight(r.text, queryWords)}
-          <div class="source">මූලාශ්‍රය: ${r.source}</div>
-        </div>
-      `).join('');
+      input.value = '';
     }
 
     function highlight(text, queryWords) {
@@ -240,7 +258,7 @@
       recognition.onresult = function(event) {
         const query = event.results[0][0].transcript;
         document.getElementById('query').value = query;
-        search();
+        sendMessage();
       };
     }
   </script>
