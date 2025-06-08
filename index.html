@@ -145,13 +145,18 @@
         );
         const results = await Promise.all(promises);
         data = results.flat();
-        console.log('All files loaded:', data.length, 'paragraphs.');
       } catch (error) {
         console.error('Error loading files:', error);
       }
     }
 
     loadAllFiles();
+
+    document.getElementById('query').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
 
     function normalize(word) {
       return word.replace(/(යන්|වන්|යන්ගේ|යන්වහන්සේ|ලා|න්|ය|ව|ළ|සේ)?$/, '');
